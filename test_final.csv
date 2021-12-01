@@ -1,0 +1,7 @@
+S_text,T_text,labels
+The system shall allow complete order sets to be predefined and personalized.,The system shall provide the ability to customize clinical templates.,1
+The system shall allow complete order sets to be predefined and personalized.,The system shall provide the ability to renew an existing medication order without requiring re-entry of order information.,1
+The system shall allow complete order sets to be predefined and personalized.,"The system shall provide the ability to display for selection a secondary, or corollary, order that is recommended in conjunction with the primary order.",1
+The system shall allow complete order sets to be predefined and personalized.,The system shall provide the ability to display the patient's weight or an indicator that the patient has a weight recorded on medication ordering screens.,0
+The system shall allow complete order sets to be predefined and personalized.,"The system shall provide the ability to specify prescription/medication order details including strength, route, frequency and comments.  Strength, route and frequency must be captured and maintained as discrete data.",0
+The system shall allow complete order sets to be predefined and personalized.,The system shall provide the ability to record the date of changes made to a patient's medication list and the identity of the user who made the changes.,0
