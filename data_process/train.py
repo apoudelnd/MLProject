@@ -7,6 +7,7 @@ from sklearn.metrics import confusion_matrix, classification_report
 import transformers
 from transformers import AdamW
 from transformers import get_linear_schedule_with_warmup
+from transformers import AutoTokenizer
 import torch
 import dataset
 from collections import defaultdict
@@ -18,7 +19,7 @@ def run():
     df = pd.read_csv(config.TRAINING_FILE).fillna("None")
     df_train, df_valid = train_test_split(
         df,
-        test_size= 0.4,
+        test_size= 0.2,
         random_state = 42,
         stratify = df.labels.values
     )
@@ -31,13 +32,7 @@ def run():
     )
 
 
-    train_data_loader = dataset.create_data_loader(df_train, config.TRAIN_BATCH_SIZE, num_workers = 4)
-    # data = next(iter(train_data_loader))
-    # print(data['input_ids'].shape)
-
-    valid_data_loader = dataset.create_data_loader(df_valid, config.VALID_BATCH_SIZE, num_workers = 2)
-
-    test_data_loader = dataset.create_data_loader(df_test, config.VALID_BATCH_SIZE, num_workers = 2)
+    
 
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -51,6 +46,14 @@ def run():
 
     for mdl in supported_models:
         # print(directory)
+        tokenizer = AutoTokenizer.from_pretrained(mdl)
+        train_data_loader = dataset.create_data_loader(df_train, config.TRAIN_BATCH_SIZE,tokenizer, num_workers = 4)
+    # data = next(iter(train_data_loader))
+    # print(data['input_ids'].shape)
+
+        valid_data_loader = dataset.create_data_loader(df_valid, config.VALID_BATCH_SIZE,tokenizer, num_workers = 2)
+
+        test_data_loader = dataset.create_data_loader(df_test, config.VALID_BATCH_SIZE,tokenizer, num_workers = 2)
     
         print ("Working on {} model" .format(mdl))
         models = Models(mdl)
@@ -99,9 +102,11 @@ def run():
                 torch.save(models.state_dict(), output)
                 best_acc = val_acc
 
-            break
+        history['train_acc'] = torch.stack(history['train_acc']).cpu()
+        history['val_acc'] = torch.stack(history['val_acc']).cpu()
 
-        engine.trainingvsvalid(history['train_acc'], history['val_acc'], mdl)
+
+        engine.trainingvsvalid(history['train_acc'].cpu(), history['val_acc'].cpu(), mdl)
 
         test_acc, _ = engine.eval_epoch(
                             test_data_loader,
@@ -126,6 +131,3 @@ def run():
 
 if __name__ == "__main__":
     run()
-
-
-    

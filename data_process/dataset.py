@@ -1,10 +1,12 @@
 from transformers.models.auto.tokenization_auto import AutoTokenizer
 import config
+import transformers
 import torch
 from torch import nn, optim
 from torch.utils.data import Dataset, DataLoader
 import torch.nn.functional as F
 from transformers.tokenization_utils_base import EncodedInput
+
 import pandas as pd
 import numpy as np
 
@@ -16,10 +18,11 @@ ATTENTION_MASK = "attention_mask"
 
 class ModelsDataset(Dataset):
 
-    def __init__(self, S_text, T_text, labels):
+    def __init__(self, S_text, T_text, labels, tokenizer):
         self.S_text = S_text
         self.T_text = T_text
         self.labels = labels
+        self.tokenizer = tokenizer
         self.max_len = config.MAX_LEN
     
     def __len__(self):
@@ -30,7 +33,7 @@ class ModelsDataset(Dataset):
         T_text = str(self.T_text[item])
         labels = self.labels[item]
 
-        encoding = AutoTokenizer.encode_plus(text = S_text,
+        encoding = self.tokenizer(text = S_text,
                                                 text_pair = T_text,
                                                 add_special_tokens= True,
                                                 padding = 'max_length',
@@ -46,11 +49,12 @@ class ModelsDataset(Dataset):
             'labels' : torch.tensor(labels, dtype = torch.float)
         }
 
-def create_data_loader(df, batch_size, num_workers):
+def create_data_loader(df, batch_size, tokenizer, num_workers):
     ds = ModelsDataset(
         S_text = df.S_text.to_numpy(),
         T_text = df.T_text.to_numpy(),
-        labels = df.labels.to_numpy()    
+        labels = df.labels.to_numpy(),
+        tokenizer = tokenizer  
     )
 
     return DataLoader(

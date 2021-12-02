@@ -11,7 +11,7 @@ import seaborn as sns
 
 
 def loss_fn(outputs, targets):
-    return nn.BCEWithLogitsLoss()(outputs, targets.view(-1,1))
+    return nn.CrossEntropyLoss()(outputs, targets.view(-1,1))
 
 
 
